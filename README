@@ -1,0 +1,34 @@
+It's Motley.
+    This is a motley collection of scripts that provision google apps accounts.
+    They are (so far) all written in python, so in theory they should be able
+    to run on any OS...but we're only testing in Linux at this point.
+
+Dependencies
+    You need Google's Python API library:
+    http://code.google.com/p/gdata-python-client/downloads/list
+
+    If you can do the following, then you should be in good shape:
+    $ python
+    Python 2.5.2 (r252:60911, Jul 22 2009, 15:35:03) 
+    >>> import gdata.apps.service
+    >>>
+
+Provisioning from Active Directory
+    If you want to provision accounts from an Active Directory (or other LDAP
+    directory), then see ldapprovision.py.
+
+    If you want to set this up to run regularly, you might put something like
+    the following in your crontab (assuming you copy these scripts into
+    /usr/local/bin/vla-google-apps-provisioning ):
+    0 0 * * * /usr/local/bin/vla-google-apps-provisioning/ldapprovision.py | logger -t google_apps_provisioning
+
+Provisioning from Somewhere Else
+    You might take a look at vlagoogleprovision.py.
+
+No Magic
+    There is no magic here. There isn't even sophistication. But since lots of
+    people need to do the same basic thing, maybe this will be useful to
+    someone.
+
+--moquist
+Tue Apr  5 21:10:56 EDT 2011

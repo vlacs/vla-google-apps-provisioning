@@ -7,7 +7,14 @@ You'll need to create an ldapconfig.py file in this directory to configure this
 script to work for your network. You can use ldapconfig-dist.py as an example to
 guide you.
 
+This script matches LDAP & Google accounts by ASSUMING that ldap's
+sAMAccountName == the google username. If you feel like implementing a step of
+indirection there so you can use some other configurable LDAP attribute instead,
+feel free. Patches are welcome -- just don't make it confusing for folks to
+configure!
+
 Copyright (C) 2011 Matt Oquist <moquist@majen.net>
+Copyright (C) 2011 Oyster River Cooperative School District http://orcsd.org
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -40,6 +47,7 @@ googleaccounts = vlagoogleprovision.AllAccounts(gservice)
 print "%s Google accounts (starting)" % len(googleaccounts.allaccounts)
 ldapcount = 0
 googlenewcount = 0
+googleupdcount = 0
 for dn in ldapconfig.search_dns :
     # Lots of google create operations may take so long the LDAP connection will time out. So establish it every time.
     l = ldap.initialize('ldap://' + ldapconfig.ldap_host)
@@ -53,13 +61,16 @@ for dn in ldapconfig.search_dns :
         sys.stdout.write("%s %s %s: " % (firstname, lastname, username))
         googleaccount = googleaccounts.accountexists(username)
         if googleaccount:
-            sys.stdout.write("exists (no update performed)\n")
-            # This doesn't really work, and the update isn't implemented.
-            #ldapupdated = ldapuser['whenChanged'][0][:14] # ex: 20080311011620.0Z -> 20080311011620
-            #googleupdated =  re.sub('[^\d]', '', googleaccount.updated.text)[:14] # ex: 1970-01-01T00:00:00.000Z -> 19700101000000
-            #if googleupdated < ldapupdated:
-            #    sys.stdout.write(" (needs update (not yet implemented): %s %s)" % (googleupdated, ldapupdated))
-            #sys.stdout.write("\n")
+            sys.stdout.write("exists")
+            if googleaccount.name.family_name == lastname and googleaccount.name.given_name == firstname :
+                sys.stdout.write(", no update.\n")
+            else :
+                sys.stdout.write(" and needs update...")
+                googleaccount.name.family_name = lastname
+                googleaccount.name.given_name = firstname
+                gservice.UpdateUser(username, googleaccount)
+                sys.stdout.write("updated.\n")
+                googleupdcount += 1
         else:
             password = newpw(ldapconfig.newpwlen)
             sys.stdout.write("creating...")
@@ -71,7 +82,7 @@ for dn in ldapconfig.search_dns :
             googlenewcount += 1
     l.unbind()
 
-
 print "%s LDAP accounts altogether" % ldapcount
 print "%s new google accounts" % googlenewcount
+print "%s updated google accounts" % googleupdcount
 

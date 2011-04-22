@@ -60,12 +60,14 @@ class AllAccounts():
         self.allaccounts = {}
         for u in allaccounts.entry:
             self.allaccounts[u.login.user_name.lower()] = u
-
-    def accountexists(self, username):
+    def exists(self, username):
         if username in self.allaccounts:
             return self.allaccounts[username]
         else:
             return False
+    def get(self):
+        for un in self.allaccounts.keys():
+            yield self.allaccounts[un]
 
 
 def gservice_init(email, domain, password):
@@ -79,12 +81,27 @@ def gservice_init_fromconf():
     return gservice_init(adminemail, domain, adminpw)
 
 
-def accountexists(gservice, username):
-    return gservice.RetrieveUser(username)
+# Ensure that a user account (1) is not admin before we'll suspend it.
+def suspenduser_safe(gservice, username):
+    try:
+      user = gservice.RetrieveUser(username)
+      if (user.login.admin != 'true'):
+          gservice.SuspendUser(username)
+          return True
+    except:
+      pass
+    return False
 
-
-def createuser(gservice, username, lastname, firstname, password):
-    gservice.CreateUser(username, lastname, firstname, password)
+# Ensure that a user account (1) is not admin and (2) has been suspended before we'll delete it.
+def deleteuser_safe(gservice, username):
+    try:
+      user = gservice.RetrieveUser(username)
+      if (user.login.suspended == 'true'):
+          gservice.DeleteUser(username)
+          return True
+    except:
+      pass
+    return False
 
 def provision(gservice, username, firstname, lastname, password, stripnums):
     """
@@ -114,12 +131,12 @@ def provision(gservice, username, firstname, lastname, password, stripnums):
     foundaccount = 0
     nickname = ''
     try:
-        user_entry = accountexists(gservice, username)
+        user_entry = gservice.RetrieveUser(username)
         print "%s: found exact %s" % (myname, username)
         foundaccount = 1
     except:
         try:
-            user_entry = accountexists(gservice, username_old)
+            user_entry = gservice.RetrieveUser(username_old)
             # We found the same username without any numbers appended.
             print "%s: found old %s" % (myname, username_old)
             foundaccount = 1
@@ -131,7 +148,7 @@ def provision(gservice, username, firstname, lastname, password, stripnums):
     if not foundaccount:
         print "%s: creating account: %s" % (myname, username)
         try:
-            createuser(gservice, username, lastname, firstname, password)
+            gservice.CreateUser(username, lastname, firstname, password)
             pass
         except Exception, inst:
             print "%s: account creationg exception: %s:%s" % (myname, type(inst), inst)
@@ -166,6 +183,7 @@ def main(argv=None):
 
     global myname
     stripnums = 1
+    operation = 'provision'
 
     if argv is None:
         argv = sys.argv
@@ -177,18 +195,24 @@ def main(argv=None):
 
         # process options
         for option, arg in opts:
-            # Set conf values with CLI arguments. Prepend conf keys with "cli_"
-            # so we can detect CLI overrides later when the configuration file
-            # is read.
             if option in ("-h", "--help"):
                 print __doc__
                 self.die()
             elif option in ("-s", "--stripnums"):
                 stripnums = 0
+            elif option in ("-o", "--operation"):
+                operation = arg
 
         gservice = gservice_init_fromconf()
         while True:
             username = sys.stdin.readline().rstrip(os.linesep)
+            # If we're suspending or deleting, we already have enough data.
+            if (operation == 'suspend'):
+              suspenduser_safe(gservice, username)
+            elif (operation == 'delete'):
+              deleteuser_safe(gservice, username)
+
+            # We must be provisioning.
             if len(username) == 0:
                 sys.exit()
             firstname = sys.stdin.readline().rstrip(os.linesep)

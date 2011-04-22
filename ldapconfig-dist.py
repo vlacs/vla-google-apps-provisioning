@@ -1,6 +1,7 @@
 # This script will create new passwords for new Google accounts.
 # What is the path/name of the file where you'd like those new username/password pairs stored?
 newaccountslogfile = '/root/google-new-accounts.txt'
+missingaccountslogfile = '/root/google-missing-accounts.txt'
 
 #######################################################################
 # LDAP config

@@ -109,7 +109,7 @@ for dn in ldapconfig.search_dns:
             sys.stdout.write("done\n")
             googlenewcount += 1
     l.unbind()
-    newaccountslog.close()
+newaccountslog.close()
 
 # ################################################
 # Find Google accounts that are missing from LDAP and perhaps suspend or delete them.

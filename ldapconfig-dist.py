@@ -15,6 +15,14 @@ ldap_binddn = 'CN=Super LDAP User,OU=Your Domain,DC=com'
 # What is the password for the above DN?
 ldap_pw = 'ldappy secret'
 
+# Is there are password hash we should use when possible? If so, what is the
+# name of the LDAP attribute containing the hash?
+password_hash_attribute = 'division'
+
+# If we are to use password_hash_attribute, what kind of hash does the attribute contain?
+# This could contain (for example): SHA-1, MD5, or None (for plaintext passwords)
+password_hash_function = 'SHA-1'
+
 # Which chunks of your LDAP tree contain users we should provision in Google?
 search_dns = (
         'OU=Staff,OU=Users,OU=Some Folks,OU=Your Domain,DC=com',
@@ -41,3 +49,8 @@ google_admin_pw = 'googley secret'
 # What is the name of your Google Apps domain?
 google_apps_domain = 'yourdomain.com'
 #######################################################################
+
+#######################################################################
+# Persistent storage
+# Where do we keep persistent data needed by ldapconfig.py?
+updatehistory_file = '/root/google-updatehistory.shelf'

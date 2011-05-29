@@ -40,6 +40,7 @@ import re
 import getopt
 import hashlib
 import ldap
+import shelve
 import vlagoogleprovision
 import ldapconfig
 
@@ -65,51 +66,96 @@ googleaccounts = vlagoogleprovision.AllAccounts(gservice)
 print "%s Google accounts (starting)" % len(googleaccounts.allaccounts)
 
 # ##################################################################
-# Find LDAP accounts that are missing (or need an update) in Google.
+# Fetch all LDAP accounts.
+ldapusernames = []
 ldapusers = []
 ldapcount = 0
-googlenewcount = 0
-googleupdcount = 0
-newaccountslog = open(ldapconfig.newaccountslogfile, 'a')
+l = ldap.initialize('ldap://' + ldapconfig.ldap_host)
+l.simple_bind_s(ldapconfig.ldap_binddn, ldapconfig.ldap_pw)
 for dn in ldapconfig.search_dns:
-    # Lots of google create operations may take so long the LDAP connection will time out. So establish it every time.
-    l = ldap.initialize('ldap://' + ldapconfig.ldap_host)
-    l.simple_bind_s(ldapconfig.ldap_binddn, ldapconfig.ldap_pw)
     data = l.search_s(dn, ldap.SCOPE_SUBTREE, '(objectclass=organizationalperson)')
     for ldapuser in data:
         ldapcount += 1
         ldapuser = ldapuser[1]
         try:
-            (firstname, lastname, username) = (ldapuser['givenName'][0], ldapuser['sn'][0], ldapuser['sAMAccountName'][0].lower())
+            # lowercase the username
+            # drop the timezone portion of whenChanged (example: '20110526184938.0Z' -> '20110526184938'
+            (firstname, lastname, username, whenchanged) = (ldapuser['givenName'][0], ldapuser['sn'][0], ldapuser['sAMAccountName'][0].lower(), ldapuser['whenChanged'][0].split('.')[0])
             #sys.stdout.write("%s %s %s: " % (ldapuser['givenName'][0], ldapuser['sn'][0], ldapuser['sAMAccountName'][0]))
         except KeyError:
             continue
-        ldapusers.append(username)
-        sys.stdout.write("%s %s %s: " % (firstname, lastname, username))
-        googleaccount = googleaccounts.exists(username)
-        if googleaccount:
-            sys.stdout.write("exists")
-            if (googleaccount.login.suspended == 'true'):
-                gservice.RestoreUser(username)
-                sys.stdout.write(", un-suspending")
-            if googleaccount.name.family_name == lastname and googleaccount.name.given_name == firstname:
-                sys.stdout.write(", no update.\n")
+
+        password_hash = None
+        password_hash_function = None
+        try:
+            password_hash = ldapuser[ldapconfig.password_hash_attribute][0]
+            password_hash_function = ldapconfig.password_hash_function # Just to make sure this is set.
+        except KeyError:
+            pass
+        except AttributeError:
+            pass
+
+        ldapusers.append({'username': username, 'firstname': firstname, 'lastname': lastname, 'password_hash': password_hash, 'password_hash_function': password_hash_function, 'whenchanged': whenchanged})
+l.unbind()
+
+# ##################################################################
+# Create and update google accouns from LDAP data.
+googlenewcount = 0
+googleupdcount = 0
+update_history = shelve.open(ldapconfig.updatehistory_file)
+newaccountslog = open(ldapconfig.newaccountslogfile, 'a')
+for ldapuser in ldapusers:
+    ldapusernames.append(ldapuser['username'])
+    sys.stdout.write("%s %s %s: " % (ldapuser['firstname'], ldapuser['lastname'], ldapuser['username']))
+    googleaccount = googleaccounts.exists(ldapuser['username'])
+    if googleaccount:
+        sys.stdout.write("exists")
+        if (googleaccount.login.suspended == 'true'):
+            gservice.RestoreUser(ldapuser['username'])
+            sys.stdout.write(", un-suspending")
+
+        try:
+            if not update_history.__contains__(ldapuser['username']):
+                update_history[ldapuser['username']] = 0
+            if update_history[ldapuser['username']] >= ldapuser['whenchanged']:
+                sys.stdout.write(", no update (last update %s).\n" % ldapuser['whenchanged'])
             else:
-                sys.stdout.write(" and needs update...")
-                googleaccount.name.family_name = lastname
-                googleaccount.name.given_name = firstname
-                gservice.UpdateUser(username, googleaccount)
+                sys.stdout.write(" and needs update (lastupdate was %s, new update from %s)..." % (update_history[ldapuser['username']], ldapuser['whenchanged']))
+                if ldapuser['password_hash']:
+                    googleaccount.login.password = ldapuser['password_hash']
+                    googleaccount.login.hash_function_name = ldapuser['password_hash_function']
+                    sys.stdout.write(" using hashed password...")
+
+                googleaccount.name.family_name = ldapuser['lastname']
+                googleaccount.name.given_name = ldapuser['firstname']
+                gservice.UpdateUser(ldapuser['username'], googleaccount)
+                update_history[ldapuser['username']] = ldapuser['whenchanged']
                 sys.stdout.write("updated.\n")
                 googleupdcount += 1
-        else:
-            password = newpw(ldapconfig.newpwlen)
+        except vlagoogleprovision.gdata.apps.service.AppsForYourDomainException:
+            sys.stdout.write("error: AppsForYourDomainException during update!\n")
+            continue
+
+    else:
+        try:
             sys.stdout.write("creating...")
-            gservice.CreateUser(username, lastname, firstname, password)
-            newaccountslog.write("%s: %s\n" % (username, password))
+            if ldapuser['password_hash']:
+                password = ldapuser['password_hash']
+                sys.stdout.write(" using hashed password...")
+            else:
+                password = newpw(ldapconfig.newpwlen)
+                password_hash_function = None
+                newaccountslog.write("%s: %s\n" % (username, password))
+
+            gservice.CreateUser(ldapuser['username'], ldapuser['lastname'], ldapuser['firstname'], ldapuser['password'], ldapuser['password_hash_function'])
+            update_history[ldapuser['username']] = ldapuser['whenchanged']
             sys.stdout.write("done\n")
             googlenewcount += 1
-    l.unbind()
+        except vlagoogleprovision.gdata.apps.service.AppsForYourDomainException:
+            sys.stdout.write("error: AppsForYourDomainException during creation!\n")
+            continue
 newaccountslog.close()
+update_history.close()
 
 # ################################################
 # Find Google accounts that are missing from LDAP and perhaps suspend or delete them.
@@ -118,7 +164,7 @@ suspendedcount = 0
 missingaccountslogfile = open(ldapconfig.missingaccountslogfile, 'w')
 for account in googleaccounts.get():
     username = account.login.user_name
-    if username not in ldapusers and account.login.admin == 'false':
+    if username not in ldapusernames and account.login.admin == 'false':
         sys.stdout.write("%s missing from LDAP" % username)
         missingaccountslogfile.write("%s\n" % username)
         missingcount += 1

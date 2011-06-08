@@ -147,7 +147,7 @@ for ldapuser in ldapusers:
                 password_hash_function = None
                 newaccountslog.write("%s: %s\n" % (username, password))
 
-            gservice.CreateUser(ldapuser['username'], ldapuser['lastname'], ldapuser['firstname'], ldapuser['password'], ldapuser['password_hash_function'])
+            gservice.CreateUser(ldapuser['username'], ldapuser['lastname'], ldapuser['firstname'], password, ldapuser['password_hash_function'])
             update_history[ldapuser['username']] = ldapuser['whenchanged']
             sys.stdout.write("done\n")
             googlenewcount += 1

@@ -81,26 +81,37 @@ def gservice_init_fromconf():
     return gservice_init(adminemail, domain, adminpw)
 
 
-# Ensure that a user account (1) is not admin before we'll suspend it.
+# Ensure that a user account is not admin before we'll update it.
+def updateuser_safe(gservice, username, googleaccount):
+    try:
+        user = gservice.RetrieveUser(username)
+        if (user.login.admin != 'true'):
+            gservice.UpdateUser(username, googleaccount)
+            return True
+    except:
+        pass
+    return False
+
+# Ensure that a user account is not admin before we'll suspend it.
 def suspenduser_safe(gservice, username):
     try:
-      user = gservice.RetrieveUser(username)
-      if (user.login.admin != 'true'):
-          gservice.SuspendUser(username)
-          return True
+        user = gservice.RetrieveUser(username)
+        if (user.login.admin != 'true'):
+            gservice.SuspendUser(username)
+            return True
     except:
-      pass
+        pass
     return False
 
 # Ensure that a user account (1) is not admin and (2) has been suspended before we'll delete it.
 def deleteuser_safe(gservice, username):
     try:
-      user = gservice.RetrieveUser(username)
-      if (user.login.suspended == 'true'):
-          gservice.DeleteUser(username)
-          return True
+        user = gservice.RetrieveUser(username)
+        if (user.login.suspended == 'true'):
+            gservice.DeleteUser(username)
+            return True
     except:
-      pass
+        pass
     return False
 
 def provision(gservice, username, firstname, lastname, password, stripnums):

@@ -128,7 +128,7 @@ for ldapuser in ldapusers:
 
                 googleaccount.name.family_name = ldapuser['lastname']
                 googleaccount.name.given_name = ldapuser['firstname']
-                updateuser_safe(gservice, ldapuser['username'], googleaccount)
+                vlagoogleprovision.updateuser_safe(gservice, ldapuser['username'], googleaccount)
                 update_history[ldapuser['username']] = ldapuser['whenchanged']
                 sys.stdout.write("updated.\n")
                 googleupdcount += 1

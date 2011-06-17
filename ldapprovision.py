@@ -8,7 +8,7 @@ script to work for your network. You can use ldapconfig-dist.py as an example to
 guide you.
 
 Usage example:
-   $ ldapprovision.py [ --delete ] [ --suspend ]
+   $ ldapprovision.py [ --delete ] [ --suspend ] [ --forceupdate <username> ]
 
 This script matches LDAP & Google accounts by ASSUMING that ldap's
 sAMAccountName == the google username. If you feel like implementing a step of
@@ -37,6 +37,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 import sys
 import random
 import re
+import bsddb
 import getopt
 import hashlib
 import ldap
@@ -51,7 +52,7 @@ dodelete = False
 dosuspend = False
 # process options
 argv = sys.argv
-opts, args = getopt.getopt(argv[1:], "ds", ["delete", "suspend", ])
+opts, args = getopt.getopt(argv[1:], "dsu:", ["delete", "suspend", "forceupdate=", ])
 for option, arg in opts:
     if option in ("-d", "--delete"):
         dodelete = True
@@ -59,6 +60,15 @@ for option, arg in opts:
         sys.exit()
     elif option in ("-s", "--suspend"):
         dosuspend = True
+    elif option in ("-u", "--forceupdate"):
+        try :
+            update_history = shelve.open(ldapconfig.updatehistory_file)
+            update_history.__delitem__(arg)
+            update_history.close()
+            print "user '%s' set for update next run" % arg
+        except bsddb._bsddb.DBNotFoundError :
+            print "user '%s' not found in update history (already set to update)" % arg
+        sys.exit()
 
 
 gservice = vlagoogleprovision.gservice_init(ldapconfig.google_admin_email, ldapconfig.google_apps_domain, ldapconfig.google_admin_pw)
@@ -128,10 +138,12 @@ for ldapuser in ldapusers:
 
                 googleaccount.name.family_name = ldapuser['lastname']
                 googleaccount.name.given_name = ldapuser['firstname']
-                vlagoogleprovision.updateuser_safe(gservice, ldapuser['username'], googleaccount)
-                update_history[ldapuser['username']] = ldapuser['whenchanged']
-                sys.stdout.write("updated.\n")
-                googleupdcount += 1
+                if vlagoogleprovision.updateuser_safe(gservice, ldapuser['username'], googleaccount) :
+                    update_history[ldapuser['username']] = ldapuser['whenchanged']
+                    sys.stdout.write("updated.\n")
+                    googleupdcount += 1
+                else :
+                    sys.stdout.write("NOT updated (google admin?).\n")
         except vlagoogleprovision.gdata.apps.service.AppsForYourDomainException:
             sys.stdout.write("error: AppsForYourDomainException during update!\n")
             continue

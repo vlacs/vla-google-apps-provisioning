@@ -15,15 +15,15 @@ Dependencies
 
 Provisioning from Active Directory
     If you want to provision accounts from an Active Directory (or other LDAP
-    directory), then see ldapprovision.py.
+    directory), or from a database, then see provision.py.
 
     If you want to set this up to run regularly, you might put something like
     the following in your crontab (assuming you copy these scripts into
     /usr/local/bin/vla-google-apps-provisioning ):
-    0 0 * * * /usr/local/bin/vla-google-apps-provisioning/ldapprovision.py | logger -t google_apps_provisioning
+    0 0 * * * /usr/local/bin/vla-google-apps-provisioning/provision.py | logger -t google_apps_provisioning
 
 Provisioning from Somewhere Else
-    You might take a look at vlagoogleprovision.py.
+    You might take a look at vlagoogleprovisionlib.py.
 
 No Magic
     There is no magic here. There isn't even sophistication. But since lots of

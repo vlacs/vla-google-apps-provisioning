@@ -54,7 +54,7 @@ class Usage(Exception):
         self.msg = msg
 
 
-class AllAccounts():
+class AllAccounts:
     def __init__(self, gservice):
         allaccounts = gservice.RetrieveAllUsers()
         self.allaccounts = {}

@@ -3,16 +3,20 @@
 newaccountslogfile = '/root/google-new-accounts.txt'
 missingaccountslogfile = '/root/google-missing-accounts.txt'
 
-# Stock options: db, ldap
+# Persistent storage
+# Where do we keep persistent data needed by ldapconfig.py?
+updatehistory_file = '/root/google-updatehistory.shelf'
+
+# Stock options: DataSourceLDAP, DataSourceDB
 # new files may be added with new options, see ldaplib.py and dblib.py for examples
-datasource = 'ldap'
+datasource = 'db'
 
 # How many characters long do you want newly created, random passwords to be?
 newpwlen = 8
 
 # If we are going to send hashed passwords to Gogole, what hash are we using?
 # This could contain (for example): SHA-1, MD5, or None (for plaintext passwords)
-password_hash_function = 'SHA-1'
+password_hash_function = 'MD5'
 
 #######################################################################
 # GOOGLE config
@@ -27,10 +31,6 @@ google_admin_pw = 'googley secret'
 google_apps_domain = 'yourdomain.com'
 #######################################################################
 
-#######################################################################
-# Persistent storage
-# Where do we keep persistent data needed by ldapconfig.py?
-updatehistory_file = '/root/google-updatehistory.shelf'
 
 
 
@@ -96,6 +96,9 @@ updatehistory_file = '/root/google-updatehistory.shelf'
 #
 ## Which field in the db_table has last names to be sent to google?
 #db_field_lastname = 'lastname'
+#
+## Which field in the db_table indicates when the user was last updated?
+db_field_whenupdated = 'datemodified'
 #######################################################################
 
 

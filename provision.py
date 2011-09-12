@@ -73,7 +73,9 @@ googleaccounts = vlagoogleprovisionlib.AllAccounts(gservice)
 print "%s Google accounts (starting)" % len(googleaccounts.allaccounts)
 
 # Fetch all local accounts.
-datasource = config.datasource()
+datasource = __import__(config.datasource)
+datasource = getattr(datasource, 'DataSource')
+datasource = datasource(config)
 datasource.getusers(config)
 
 # ##################################################################
@@ -84,9 +86,6 @@ update_history = shelve.open(config.updatehistory_file)
 newaccountslog = open(config.newaccountslogfile, 'a')
 usernames = []
 for localaccount in datasource.users:
-    print "un: %s" % localaccount['username']
-    continue
-
     usernames.append(localaccount['username'])
     sys.stdout.write("%s %s %s: " % (localaccount['firstname'], localaccount['lastname'], localaccount['username']))
     googleaccount = googleaccounts.exists(localaccount['username'])
@@ -116,6 +115,7 @@ for localaccount in datasource.users:
                     googleupdcount += 1
                 else :
                     sys.stdout.write("NOT updated (google admin?).\n")
+                sys.stdout.write("\n")
         except vlagoogleprovisionlib.gdata.apps.service.AppsForYourDomainException:
             sys.stdout.write("error: AppsForYourDomainException during update!\n")
             continue
@@ -149,7 +149,7 @@ missingaccountslogfile = open(config.missingaccountslogfile, 'w')
 for account in googleaccounts.get():
     username = account.login.user_name
     if username not in usernames and account.login.admin == 'false':
-        sys.stdout.write("%s missing from LDAP" % username)
+        sys.stdout.write("%s missing from local source" % username)
         missingaccountslogfile.write("%s\n" % username)
         missingcount += 1
         if (account.login.suspended == 'true'):
@@ -162,7 +162,7 @@ for account in googleaccounts.get():
         sys.stdout.write("\n")
 missingaccountslogfile.close()
 
-print "%s local accounts altogether" % count
+print "%s local accounts altogether" % datasource.count
 print "%s new google accounts" % googlenewcount
 print "%s updated google accounts" % googleupdcount
 print "%s google accounts missing from local source (%s suspended just now)" % (missingcount, suspendedcount)

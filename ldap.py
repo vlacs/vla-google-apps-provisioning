@@ -1,6 +1,6 @@
 import ldap
 
-class DataSourceLDAP:
+class DataSource:
     usernames = []
     users = []
     count = 0

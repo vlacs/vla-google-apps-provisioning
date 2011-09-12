@@ -84,6 +84,9 @@ update_history = shelve.open(config.updatehistory_file)
 newaccountslog = open(config.newaccountslogfile, 'a')
 usernames = []
 for localaccount in datasource.users:
+    print "un: %s" % localaccount['username']
+    continue
+
     usernames.append(localaccount['username'])
     sys.stdout.write("%s %s %s: " % (localaccount['firstname'], localaccount['lastname'], localaccount['username']))
     googleaccount = googleaccounts.exists(localaccount['username'])

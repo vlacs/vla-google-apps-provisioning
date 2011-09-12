@@ -3,9 +3,9 @@
 newaccountslogfile = '/root/google-new-accounts.txt'
 missingaccountslogfile = '/root/google-missing-accounts.txt'
 
-# Stock options: DataSourceLDAP, DataSourceDB
+# Stock options: db, ldap
 # new files may be added with new options, see ldaplib.py and dblib.py for examples
-datasource = 'DataSourceLDAP'
+datasource = 'ldap'
 
 # How many characters long do you want newly created, random passwords to be?
 newpwlen = 8
@@ -67,10 +67,14 @@ updatehistory_file = '/root/google-updatehistory.shelf'
 
 ## What type of DB are we using?
 ## Anything python supports can (theoretically) be used, perhaps with some modifications to dblib.py.
-# db_type = 'postgres'
+## Currently this is ignored!
+## db_type = 'postgres'
 
 ## What is the name or IP address of your LDAP server?
 #db_host = '192.168.0.1'
+#
+## What is the name your database?
+#db_name = 'somedatabase'
 #
 ## We need a name to conect to the DB server. Which one can we use?
 #db_username = 'dbusername'

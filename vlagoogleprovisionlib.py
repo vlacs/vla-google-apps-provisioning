@@ -77,8 +77,8 @@ def gservice_init(email, domain, password):
 
 
 def gservice_init_fromconf():
-    from config_google import adminemail, domain, adminpw
-    return gservice_init(adminemail, domain, adminpw)
+    from config import google_admin_email, google_apps_domain, google_admin_pw
+    return gservice_init(google_admin_email, google_apps_domain, google_admin_pw)
 
 
 # Ensure that a user account is not admin before we'll update it.

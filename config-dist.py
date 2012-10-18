@@ -7,9 +7,9 @@ missingaccountslogfile = '/root/google-missing-accounts.txt'
 # Where do we keep persistent data needed by ldapconfig.py?
 updatehistory_file = '/root/google-updatehistory.shelf'
 
-# Stock options: DataSourceLDAP, DataSourceDB
-# new files may be added with new options, see ldaplib.py and dblib.py for examples
-datasource = 'db'
+# Stock options: datasource-ldap, datasource-db
+# new files may be added with new options, see datasource-ldap.py and datasource-db.py for examples
+datasource = 'datasource-db'
 
 # How many characters long do you want newly created, random passwords to be?
 newpwlen = 8

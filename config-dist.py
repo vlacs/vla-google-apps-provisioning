@@ -52,7 +52,7 @@ google_apps_domain = 'yourdomain.com'
 #ldap_password_hash_attribute = 'division'
 #
 ## Which chunks of your LDAP tree contain users we should provision in Google?
-#search_dns = (
+#ldap_search_bases = (
 #        'OU=Staff,OU=Users,OU=Some Folks,OU=Your Domain,DC=com',
 #        'OU=2011 (Seniors),OU=Students,OU=Users,OU=Academic,OU=Some School,OU=Your Domain,DC=com',
 #        'OU=2012 (Juniors),OU=Students,OU=Users,OU=Academic,OU=Some School,OU=Your Domain,DC=com',

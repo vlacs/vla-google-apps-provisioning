@@ -1,4 +1,5 @@
 import ldap
+import re
 
 class DataSource:
     usernames = []
@@ -7,15 +8,18 @@ class DataSource:
     def getusers(self, config):
         l = ldap.initialize('ldap://' + config.ldap_host)
         l.simple_bind_s(config.ldap_binddn, config.ldap_pw)
-        for dn in config.ldap_search_dns:
-            data = l.search_s(dn, ldap.SCOPE_SUBTREE, '(objectclass=organizationalperson)')
+        for searchbase in config.ldap_search_bases:
+            data = l.search_s(searchbase, ldap.SCOPE_SUBTREE, '(objectclass=organizationalperson)')
             for ldapuser in data:
-                count += 1
+                self.count += 1
                 ldapuser = ldapuser[1]
                 try:
                     # lowercase the username
                     # drop the timezone portion of whenChanged (example: '20110526184938.0Z' -> '20110526184938'
                     (firstname, lastname, username, whenchanged) = (ldapuser['givenName'][0], ldapuser['sn'][0], ldapuser['sAMAccountName'][0].lower(), ldapuser['whenChanged'][0].split('.')[0])
+                    ous = ldap.explode_dn(ldapuser['distinguishedName'][0].lower())
+                    ous = map(lambda x: x[3:], filter(lambda x: re.match('ou=', x), ous))
+                    ous.reverse()
                     #sys.stdout.write("%s %s %s: " % (ldapuser['givenName'][0], ldapuser['sn'][0], ldapuser['sAMAccountName'][0]))
                 except KeyError:
                     continue
@@ -30,7 +34,7 @@ class DataSource:
                 except AttributeError:
                     pass
 
-                self.users.append({'username': username, 'firstname': firstname, 'lastname': lastname, 'password_hash': password_hash, 'password_hash_function': password_hash_function, 'whenchanged': whenchanged})
+                self.users.append({'username': username, 'firstname': firstname, 'lastname': lastname, 'ous': ous, 'password_hash': password_hash, 'password_hash_function': password_hash_function, 'whenchanged': whenchanged})
         l.unbind()
         return
 

@@ -57,9 +57,7 @@ class Usage(Exception):
 class AllAccounts:
     def __init__(self, gservice):
         allaccounts = gservice.RetrieveAllUsers()
-        self.allaccounts = {}
-        for u in allaccounts.entry:
-            self.allaccounts[u.login.user_name.lower()] = u
+        self.allaccounts = dict([u.login.user_name.lower(), u] for u in allaccounts.entry)
     def exists(self, username):
         if username in self.allaccounts:
             return self.allaccounts[username]

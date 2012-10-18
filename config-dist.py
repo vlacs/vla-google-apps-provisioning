@@ -98,7 +98,7 @@ google_apps_domain = 'yourdomain.com'
 #db_field_lastname = 'lastname'
 #
 ## Which field in the db_table indicates when the user was last updated?
-db_field_whenupdated = 'datemodified'
+#db_field_whenupdated = 'datemodified'
 #######################################################################
 
 

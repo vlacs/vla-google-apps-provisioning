@@ -50,10 +50,17 @@ datasource = __import__(config.datasource)
 datasource = getattr(datasource, 'DataSource')
 datasource = datasource()
 
-if testname == 'getusers' :
+if testname == 'getusers':
     datasource.getusers(config)
     for localaccount in datasource.users:
         print localaccount
+elif testname == 'ous':
+    datasource.getusers(config)
+    oumaker = vlagoogleprovisionlib.OUMaker(config.google_admin_email, config.google_apps_domain, config.google_admin_pw)
+    for localaccount in datasource.users:
+        print localaccount
+        path = oumaker.ensure(localaccount['ous'])
+        oumaker.userinto(localaccount['username'], path)
 
 sys.exit()
 

@@ -60,6 +60,15 @@ google_apps_domain = 'yourdomain.com'
 #        'OU=2014 (Freshman),OU=Students,OU=Users,OU=Academic,OU=Some School,OU=Your Domain,DC=com',
 #        'OU=Staff,OU=Users,OU=Academic,OU=Some School,OU=Your Domain,DC=com',
 #        )
+#
+# ldap_attrs = {
+#     'username' : 'sAMAccountName',
+#     'firstname' : 'givenName',
+#     'lastname' : 'sn',
+#     'whenchanged' : 'whenChanged',
+#     'ous' : 'distinguishedName',
+#     }
+#
 #######################################################################
 
 #######################################################################

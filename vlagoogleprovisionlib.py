@@ -45,7 +45,9 @@ import os
 import sys
 import getopt
 import re
+import urllib
 import gdata.apps.service
+import gdata.apps.organization.client
 
 myname = 'vlagoogleprovision.py'
 
@@ -68,11 +70,60 @@ class AllAccounts:
             yield self.allaccounts[un]
 
 
+class OUMaker:
+    ouclient = None
+    customer_id = None
+    domain = None
+    existing_paths = []
+    def __init__(self, email, domain, password):
+        self.domain = domain
+
+        self.ouclient = gdata.apps.organization.client.OrganizationUnitProvisioningClient(domain)
+        self.ouclient.ClientLogin(email, password, source='apps')
+
+        # Get our customer_id
+        tmp = self.ouclient.RetrieveCustomerId()
+        tmp = dict([p.name,p.value] for p in tmp.property)
+        self.customer_id = tmp['customerId']
+
+
+    def retrieveAll(self):
+        ous = self.ouclient.RetrievePageOfOrgUnits(self.customer_id, startKey=None)
+        ous = [dict([p.name, p.value] for p in ou.property) for ou in ous.entry]
+        self.existing_paths = [urllib.unquote_plus(ou['orgUnitPath']) for ou in ous]
+
+    """
+    ous is a list, starting at the root OU and listing from parent to child.
+    Example: ous = ['parent', 'child'] will ensure the orgUnitPath 'parent/child' exists at Google.
+    """
+    def ensure(self, ous):
+        if not self.existing_paths:
+            self.retrieveAll()
+
+        path = ''
+        for ou in ous:
+            path += '/' + ou
+            if path[1:] in self.existing_paths:
+                continue
+            else:
+                print "creating OU: %s" % path[1:]
+                name = path[1:].split('/')[-1]
+                parent_org_unit_path = path[1:].split('/')[:-1]
+                parent_org_unit_path = '/'.join(parent_org_unit_path) or '/'
+                self.ouclient.CreateOrgUnit(self.customer_id, name, parent_org_unit_path, description='', block_inheritance=False)
+                self.existing_paths.append(path[1:])
+        return path[1:]
+
+    def userinto(self, username, org_unit_path):
+        user_email = username + '@' + self.domain
+        print "UpdateOrgUser: user_email: %s, org_unit_path: %s" % (user_email, org_unit_path)
+        if username == 'areardontest' or username == 'mouqist' or username == 'dmckinnon':
+            self.ouclient.UpdateOrgUser(self.customer_id, user_email, org_unit_path)
+
 def gservice_init(email, domain, password):
     gservice = gdata.apps.service.AppsService(email=email, domain=domain, password=password)
     gservice.ProgrammaticLogin()
     return gservice
-
 
 def gservice_init_fromconf():
     from config import google_admin_email, google_apps_domain, google_admin_pw

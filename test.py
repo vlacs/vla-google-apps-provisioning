@@ -56,11 +56,11 @@ if testname == 'getusers':
         print localaccount
 elif testname == 'ous':
     datasource.getusers(config)
-    oumaker = vlagoogleprovisionlib.OUMaker(config.google_admin_email, config.google_apps_domain, config.google_admin_pw)
+    ouhandler = vlagoogleprovisionlib.OUHandler(config.google_admin_email, config.google_apps_domain, config.google_admin_pw)
     for localaccount in datasource.users:
         print localaccount
-        path = oumaker.ensure(localaccount['ous'])
-        oumaker.userinto(localaccount['username'], path)
+        ouhandler.ensure_updateorguser(localaccount['username'], localaccount['ous'])
+        sys.exit()
 
 sys.exit()
 

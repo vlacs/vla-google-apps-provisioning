@@ -70,7 +70,7 @@ class AllAccounts:
             yield self.allaccounts[un]
 
 
-class OUMaker:
+class OUHandler:
     ouclient = None
     customer_id = None
     domain = None
@@ -94,9 +94,9 @@ class OUMaker:
 
     """
     ous is a list, starting at the root OU and listing from parent to child.
-    Example: ous = ['parent', 'child'] will ensure the orgUnitPath 'parent/child' exists at Google.
+    Example: ous = ['parent', 'child', 'grandchild'] will ensure the orgUnitPath 'parent/child/grandchild' exists at Google.
     """
-    def ensure(self, ous):
+    def ensure_ou(self, ous):
         if not self.existing_paths:
             self.retrieveAll()
 
@@ -114,11 +114,14 @@ class OUMaker:
                 self.existing_paths.append(path[1:])
         return path[1:]
 
-    def userinto(self, username, org_unit_path):
+    def updateorguser(self, username, org_unit_path):
         user_email = username + '@' + self.domain
         print "UpdateOrgUser: user_email: %s, org_unit_path: %s" % (user_email, org_unit_path)
-        if username == 'areardontest' or username == 'mouqist' or username == 'dmckinnon':
-            self.ouclient.UpdateOrgUser(self.customer_id, user_email, org_unit_path)
+        return self.ouclient.UpdateOrgUser(self.customer_id, user_email, org_unit_path)
+
+    def ensure_updateorguser(self, username, ous):
+        path = self.ensure_ou(ous)
+        return self.updateorguser(username, path)
 
 def gservice_init(email, domain, password):
     gservice = gdata.apps.service.AppsService(email=email, domain=domain, password=password)

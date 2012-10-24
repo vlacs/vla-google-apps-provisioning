@@ -21,9 +21,11 @@ class DataSource:
                     username = ldapuser[config.ldap_attrs['username']][0]
                     whenchanged = ldapuser[config.ldap_attrs['whenchanged']][0]
 
-                    ous = ldap.explode_dn(ldapuser[config.ldap_attrs['ous']][0].lower())
-                    ous = map(lambda x: x[3:], filter(lambda x: re.match('ou=', x), ous))
-                    ous.reverse()
+                    ous = ['/']
+                    if 'ous' in config.ldap_attrs:
+                        ous = ldap.explode_dn(ldapuser[config.ldap_attrs['ous']][0].lower())
+                        ous = map(lambda x: x[3:], filter(lambda x: re.match('ou=', x), ous))
+                        ous.reverse()
                     #sys.stdout.write("%s %s %s: " % (ldapuser['givenName'][0], ldapuser['sn'][0], ldapuser['sAMAccountName'][0]))
                 except KeyError, inst:
                     print "exception: %s:%s" % (type(inst), inst)

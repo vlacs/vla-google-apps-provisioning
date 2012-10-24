@@ -78,6 +78,10 @@ datasource = getattr(datasource, 'DataSource')
 datasource = datasource(config)
 datasource.getusers(config)
 
+ouhandler = False
+if config.replicate_ous:
+    ouhandler = vlagoogleprovisionlib.OUHandler(config.google_admin_email, config.google_apps_domain, config.google_admin_pw)
+
 # ##################################################################
 # Create and update google accouns from local data.
 googlenewcount = 0
@@ -110,6 +114,8 @@ for localaccount in datasource.users:
                 googleaccount.name.family_name = localaccount['lastname']
                 googleaccount.name.given_name = localaccount['firstname']
                 if vlagoogleprovisionlib.updateuser_safe(gservice, localaccount['username'], googleaccount) :
+                    if ouhandler:
+                        ouhandler.ensure_updateorguser(localaccount['username'], localaccount['ous'])
                     update_history[localaccount['username']] = localaccount['whenchanged']
                     sys.stdout.write("updated.\n")
                     googleupdcount += 1

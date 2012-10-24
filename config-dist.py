@@ -18,6 +18,9 @@ newpwlen = 8
 # This could contain (for example): SHA-1, MD5, or None (for plaintext passwords)
 password_hash_function = 'MD5'
 
+# If the configured datasource returns 'ous', shall we replicate these at Google?
+replicate_ous = True
+
 #######################################################################
 # GOOGLE config
 
@@ -62,10 +65,13 @@ google_apps_domain = 'yourdomain.com'
 #        )
 #
 # ldap_attrs = {
+#     # required keys
 #     'username' : 'sAMAccountName',
 #     'firstname' : 'givenName',
 #     'lastname' : 'sn',
 #     'whenchanged' : 'whenChanged',
+#
+#     # optional keys
 #     'ous' : 'distinguishedName',
 #     }
 #

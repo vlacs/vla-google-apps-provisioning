@@ -19,7 +19,7 @@ class DataSource:
                     firstname = ldapuser[config.ldap_attrs['firstname']][0]
                     lastname = ldapuser[config.ldap_attrs['lastname']][0]
                     username = ldapuser[config.ldap_attrs['username']][0]
-                    whenchanged = ldapuser[config.ldap_attrs['whenchanged']][0]
+                    whenchanged = ldapuser[config.ldap_attrs['whenchanged']][0].split('.')[0]
 
                     ous = ['/']
                     if 'ous' in config.ldap_attrs:

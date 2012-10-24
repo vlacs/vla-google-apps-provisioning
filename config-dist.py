@@ -14,7 +14,7 @@ datasource = 'datasource-db'
 # How many characters long do you want newly created, random passwords to be?
 newpwlen = 8
 
-# If we are going to send hashed passwords to Gogole, what hash are we using?
+# If we are going to send hashed passwords to Google, what hash are we using?
 # This could contain (for example): SHA-1, MD5, or None (for plaintext passwords)
 password_hash_function = 'MD5'
 

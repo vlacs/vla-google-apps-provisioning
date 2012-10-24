@@ -75,7 +75,7 @@ print "%s Google accounts (starting)" % len(googleaccounts.allaccounts)
 # Fetch all local accounts.
 datasource = __import__(config.datasource)
 datasource = getattr(datasource, 'DataSource')
-datasource = datasource(config)
+datasource = datasource()
 datasource.getusers(config)
 
 ouhandler = False
@@ -100,7 +100,7 @@ for localaccount in datasource.users:
             sys.stdout.write(", un-suspending")
 
         try:
-            if not update_history.__contains__(localaccount['username']):
+            if localaccount['username'] not in update_history:
                 update_history[localaccount['username']] = 0
             if update_history[localaccount['username']] >= localaccount['whenchanged']:
                 sys.stdout.write(", no update (last update %s).\n" % localaccount['whenchanged'])
@@ -114,7 +114,7 @@ for localaccount in datasource.users:
                 googleaccount.name.family_name = localaccount['lastname']
                 googleaccount.name.given_name = localaccount['firstname']
                 if vlagoogleprovisionlib.updateuser_safe(gservice, localaccount['username'], googleaccount) :
-                    if ouhandler:
+                    if ouhandler and 'ous' in localaccount:
                         ouhandler.ensure_updateorguser(localaccount['username'], localaccount['ous'])
                     update_history[localaccount['username']] = localaccount['whenchanged']
                     sys.stdout.write("updated.\n")
@@ -138,6 +138,8 @@ for localaccount in datasource.users:
                 newaccountslog.write("%s: %s\n" % (username, password))
 
             gservice.CreateUser(localaccount['username'], localaccount['lastname'], localaccount['firstname'], password, localaccount['password_hash_function'])
+            if ouhandler and 'ous' in localaccount:
+                ouhandler.ensure_updateorguser(localaccount['username'], localaccount['ous'])
             update_history[localaccount['username']] = localaccount['whenchanged']
             sys.stdout.write("done\n")
             googlenewcount += 1

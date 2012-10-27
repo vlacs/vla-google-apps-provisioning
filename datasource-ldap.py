@@ -14,11 +14,13 @@ class DataSource:
                 self.count += 1
                 ldapuser = ldapuser[1]
                 try:
-                    # lowercase the username
-                    # drop the timezone portion of whenChanged (example: '20110526184938.0Z' -> '20110526184938'
                     firstname = ldapuser[config.ldap_attrs['firstname']][0]
                     lastname = ldapuser[config.ldap_attrs['lastname']][0]
-                    username = ldapuser[config.ldap_attrs['username']][0]
+
+                    # lowercase the username
+                    username = ldapuser[config.ldap_attrs['username']][0].lower()
+
+                    # drop the timezone portion of whenChanged (example: '20110526184938.0Z' -> '20110526184938'
                     whenchanged = ldapuser[config.ldap_attrs['whenchanged']][0].split('.')[0]
 
                     ous = ['/']

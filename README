@@ -14,10 +14,6 @@ Dependencies
     >>>
 
 Provisioning from Active Directory or a database
-    NOTE: LDAP provisioning untested after a rearchitecture of this project. It
-    will be implemented and tested soon, but beware if you use it right now that
-    there may be more bugs than usual!
-
     If you want to provision accounts from an Active Directory (or other LDAP
     directory), or from a database, then see provision.py.
 
@@ -36,9 +32,7 @@ No Magic
 
 Thanks To
     VLACS: http://vlacs.org
-        - started with vlagoogleprovision.py
     Oyster River Cooperative School District: http://orcsd.org
-        - ORCSD contributed ldapprovision.py
+    Exeter Regional Cooperative School District: http://sau16.org
 
 Created: Tue Apr  5 21:10:56 EDT 2011
-Updated: Mon Sep 12 11:49:23 CDT 2011

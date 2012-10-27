@@ -11,7 +11,12 @@ Usage example:
    $ provision.py [ --delete ] [ --suspend ] [ --forceupdate <username> ]
 
 This script matches accounts from a local data source with Google accounts by
-ASSUMING that the local account usernames == the google usernames.
+ASSUMING that the local account usernames == the google usernames. If the
+datasource yields email addresses that match your Google Apps domain, the
+@domain part will be stripped. For example:
+  * "username@yourdomain.com" will be treated as "username"
+  * "username@someotherdomain.com" will be treated as an error
+  * "username" will be treated as "username"
 
 Copyright (C) 2011 VLACS (author: Matt Oquist <moquist@majen.net>)
 Copyright (C) 2011 Matt Oquist <moquist@majen.net>

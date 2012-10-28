@@ -20,10 +20,26 @@ class DataSource:
         for user in cur:
             self.count += 1
             try:
+                firstname = user[config.db_field_firstname]
+                lastname = user[config.db_field_lastname]
+
                 # lowercase the username
-                (firstname, lastname, username, whenchanged) = (user[config.db_field_firstname], user[config.db_field_lastname], user[config.db_field_username].lower(), user[config.db_field_whenupdated])
+                username = user[config.db_field_username].lower()
+
+                # drop the google domain from username, in case it's an email address
+                username = username.replace('@' + config.google_apps_domain, '')
+                assert username.count('@') == 0
+
+                whenchanged = user[config.db_field_whenupdated]
                 #print "%s %s: %s, %s" % (firstname, lastname, username, whenchanged)
-            except KeyError:
+
+            except KeyError, inst:
+                print "exception: %s:%s" % (type(inst), inst)
+                print ldapuser
+                continue
+            except AssertionError, inst:
+                print "exception: %s:%s" % (type(inst), inst)
+                print ldapuser
                 continue
 
             password_hash = None

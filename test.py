@@ -50,7 +50,7 @@ datasource = __import__(config.datasource)
 datasource = getattr(datasource, 'DataSource')
 datasource = datasource()
 
-if testname == 'getusers':
+if testname == 'datasource.getusers':
     datasource.getusers(config)
     for localaccount in datasource.users:
         print localaccount

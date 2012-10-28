@@ -19,6 +19,9 @@ class DataSource:
 
                     # lowercase the username
                     username = ldapuser[config.ldap_attrs['username']][0].lower()
+                    # drop the google domain from username, in case it's an email address
+                    username = username.replace('@' + config.google_apps_domain, '')
+                    assert username.count('@') == 0
 
                     # drop the timezone portion of whenChanged (example: '20110526184938.0Z' -> '20110526184938'
                     whenchanged = ldapuser[config.ldap_attrs['whenchanged']][0].split('.')[0]
@@ -30,6 +33,10 @@ class DataSource:
                         ous.reverse()
                     #sys.stdout.write("%s %s %s: " % (ldapuser['givenName'][0], ldapuser['sn'][0], ldapuser['sAMAccountName'][0]))
                 except KeyError, inst:
+                    print "exception: %s:%s" % (type(inst), inst)
+                    print ldapuser
+                    continue
+                except AssertionError, inst:
                     print "exception: %s:%s" % (type(inst), inst)
                     print ldapuser
                     continue

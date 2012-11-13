@@ -120,7 +120,11 @@ for localaccount in datasource.users:
                 googleaccount.name.given_name = localaccount['firstname']
                 if vlagoogleprovisionlib.updateuser_safe(gservice, localaccount['username'], googleaccount) :
                     if ouhandler and 'ous' in localaccount:
-                        ouhandler.ensure_updateorguser(localaccount['username'], localaccount['ous'])
+                        try:
+                            ouhandler.ensure_updateorguser(localaccount['username'], localaccount['ous'])
+                        except Exception, inst:
+                            sys.stdout.write("%s(%s): ensure_updateorguser exception: %s:%s" % (localaccount['username'], localaccount['ous'], type(inst), inst))
+                            continue
                     update_history[localaccount['username']] = localaccount['whenchanged']
                     sys.stdout.write("updated.\n")
                     googleupdcount += 1
@@ -140,11 +144,15 @@ for localaccount in datasource.users:
             else:
                 password = newpw(config.newpwlen)
                 password_hash_function = None
-                newaccountslog.write("%s: %s\n" % (username, password))
+                newaccountslog.write("%s: %s\n" % (localaccount['username'], password))
 
             gservice.CreateUser(localaccount['username'], localaccount['lastname'], localaccount['firstname'], password, localaccount['password_hash_function'])
             if ouhandler and 'ous' in localaccount:
-                ouhandler.ensure_updateorguser(localaccount['username'], localaccount['ous'])
+                try:
+                    ouhandler.ensure_updateorguser(localaccount['username'], localaccount['ous'])
+                except Exception, inst:
+                    sys.stdout.write("%s(%s): ensure_updateorguser exception: %s:%s" % (localaccount['username'], localaccount['ous'], type(inst), inst))
+                    continue
             update_history[localaccount['username']] = localaccount['whenchanged']
             sys.stdout.write("done\n")
             googlenewcount += 1

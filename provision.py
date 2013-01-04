@@ -11,7 +11,7 @@ Usage example:
    $ provision.py [ --delete ] [ --suspend ] [ --forceupdate <username> ]
 
 This script matches accounts from a local data source with Google accounts by
-ASSUMING that the local account usernames == the google usernames. If the
+ASSUMING that the local account usernames == the Google usernames. If the
 datasource yields email addresses that match your Google Apps domain, the
 @domain part will be stripped. For example:
   * "username@yourdomain.com" will be treated as "username"
@@ -50,13 +50,35 @@ import config
 def newpw(length):
     return hashlib.md5(str(random.random())).hexdigest()[0:length]
 
+def usage():
+    print """
+provision.py
+    Provision Google apps user accounts based on accounts that exist in a local data source.
+    You MUST have edited config.py in the directory where this script lives prior to using this script.
+
+    -h, --help
+        Print this message.
+
+    -s, --suspend
+        Suspend all Google accounts that do not exist in the local source (as it is currently configured).
+        Keep in mind that if you remove an OU from your list in config.py, all the accounts under it will disappear from the perspective of this script. Use --suspend with caution!
+
+        The default is to print a message and otherwise ignore these accounts.
+
+    -u, --forceupdate=USERNAME
+        Force the account that has the specified username to be updated next time this script runs.
+    """
+
 dodelete = False
 dosuspend = False
 # process options
 argv = sys.argv
-opts, args = getopt.getopt(argv[1:], "dsu:", ["delete", "suspend", "forceupdate=", ])
+opts, args = getopt.getopt(argv[1:], "dhsu:", ["delete", "help", "suspend", "forceupdate=", ])
 for option, arg in opts:
-    if option in ("-d", "--delete"):
+    if option in ("-h", "--help"):
+        usage()
+        sys.exit()
+    elif option in ("-d", "--delete"):
         dodelete = True
         print "Deletion not supported quite yet...\n"
         sys.exit()

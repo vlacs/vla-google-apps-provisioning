@@ -54,6 +54,9 @@ google_apps_domain = 'yourdomain.com'
 ## name of the LDAP attribute containing the hash?
 #ldap_password_hash_attribute = 'division'
 #
+## Exclude disabled LDAP users using bit 2 of Active Directory's userAccountControl attribute?
+#ldap_exclude_disabled = False
+#
 ## Which chunks of your LDAP tree contain users we should provision in Google?
 #ldap_search_bases = (
 #        'OU=Staff,OU=Users,OU=Some Folks,OU=Your Domain,DC=com',
@@ -73,6 +76,10 @@ google_apps_domain = 'yourdomain.com'
 #
 #     # optional keys
 #     'ous' : 'distinguishedName',
+#
+#     # This is proprietary AD :(, but we need to check bit 2, so we'll just
+#     # grab it for now and handle it specially...
+#     'userAccountControl' : 'userAccountControl',
 #     }
 #
 #######################################################################

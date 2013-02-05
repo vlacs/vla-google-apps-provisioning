@@ -7,9 +7,6 @@ You'll need to create a config.py file in this directory to configure this
 script to work for your network. You can use config-dist.py as an example to
 guide you.
 
-Usage example:
-   $ provision.py [ --delete ] [ --suspend ] [ --forceupdate <username> ]
-
 This script matches accounts from a local data source with Google accounts by
 ASSUMING that the local account usernames == the Google usernames. If the
 datasource yields email addresses that match your Google Apps domain, the
@@ -102,7 +99,7 @@ print "%s Google accounts (starting)" % len(googleaccounts.allaccounts)
 # Fetch all local accounts.
 datasource = __import__(config.datasource)
 datasource = getattr(datasource, 'DataSource')
-datasource = datasource()
+datasource = datasource(config)
 datasource.getusers(config)
 
 ouhandler = False

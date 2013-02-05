@@ -5,6 +5,10 @@ class DataSource:
     usernames = []
     users = []
     count = 0
+
+    def __init__(self, config):
+        pass
+
     def getusers(self, config):
         l = ldap.initialize('ldap://' + config.ldap_host)
         l.simple_bind_s(config.ldap_binddn, config.ldap_pw)

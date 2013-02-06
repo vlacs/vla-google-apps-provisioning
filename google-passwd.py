@@ -51,7 +51,7 @@ google-passwd.py [options] <username>
 argv = sys.argv
 do_override = False
 hash_function = None
-opts, args = getopt.getopt(argv[1:], "fho", ["function", "help", "override-admin", ])
+opts, args = getopt.getopt(argv[1:], "f:ho", ["function=", "help", "override-admin", ])
 for option, arg in opts:
     if option in ("-h", "--help"):
         usage()

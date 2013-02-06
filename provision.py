@@ -156,8 +156,8 @@ for localaccount in datasource.users:
                 else :
                     sys.stdout.write("NOT updated (google admin?).\n")
                 sys.stdout.write("\n")
-        except vlagoogleprovisionlib.gdata.apps.service.AppsForYourDomainException:
-            sys.stdout.write("error: AppsForYourDomainException during update!\n")
+        except Exception, inst:
+            sys.stdout.write("%s: update exception: %s:%s" % (localaccount['username'], type(inst), inst))
             continue
 
     else:
@@ -181,8 +181,8 @@ for localaccount in datasource.users:
             update_history[localaccount['username']] = localaccount['whenchanged']
             sys.stdout.write("done\n")
             googlenewcount += 1
-        except vlagoogleprovisionlib.gdata.apps.service.AppsForYourDomainException:
-            sys.stdout.write("error: AppsForYourDomainException during creation!\n")
+        except Exception, inst:
+            sys.stdout.write("%s: creation exception: %s:%s" % (localaccount['username'], type(inst), inst))
             continue
 newaccountslog.close()
 update_history.close()

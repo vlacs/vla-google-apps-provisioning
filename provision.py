@@ -79,8 +79,14 @@ for option, arg in opts:
         dodelete = True
         print "Deletion not supported quite yet...\n"
         sys.exit()
+        if config.datasource == 'datasource-stdin':
+            print "-d,--delete may not be used with datasource-stdin."
+            sys.exit()
     elif option in ("-s", "--suspend"):
         dosuspend = True
+        if config.datasource == 'datasource-stdin':
+            print "-s,--suspend may not be used with datasource-stdin."
+            sys.exit()
     elif option in ("-u", "--forceupdate"):
         try :
             update_history = shelve.open(config.updatehistory_file)
@@ -162,7 +168,7 @@ for localaccount in datasource.users:
                 sys.stdout.write(" using hashed password...")
             else:
                 password = newpw(config.newpwlen)
-                password_hash_function = None
+                localaccount['password_hash_function'] = None
                 newaccountslog.write("%s: %s\n" % (localaccount['username'], password))
 
             gservice.CreateUser(localaccount['username'], localaccount['lastname'], localaccount['firstname'], password, localaccount['password_hash_function'])

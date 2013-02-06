@@ -140,7 +140,8 @@ def updateuser_safe(gservice, username, googleaccount):
         if (user.login.admin != 'true'):
             gservice.UpdateUser(username, googleaccount)
             return True
-    except:
+    except Exception, inst:
+        sys.stdout.write("\n%s: updateuser_safe exception: %s:%s" % (username, type(inst), inst))
         pass
     return False
 
@@ -151,7 +152,8 @@ def suspenduser_safe(gservice, username):
         if (user.login.admin != 'true'):
             gservice.SuspendUser(username)
             return True
-    except:
+    except Exception, inst:
+        sys.stdout.write("\n%s: suspenduser_safe exception: %s:%s" % (username, type(inst), inst))
         pass
     return False
 
@@ -162,7 +164,8 @@ def deleteuser_safe(gservice, username):
         if (user.login.suspended == 'true'):
             gservice.DeleteUser(username)
             return True
-    except:
+    except Exception, inst:
+        sys.stdout.write("\n%s: deleteuser_safe exception: %s:%s" % (username, type(inst), inst))
         pass
     return False
 

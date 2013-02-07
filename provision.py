@@ -99,6 +99,7 @@ for option, arg in opts:
 
 
 gservice = vlagoogleprovisionlib.gservice_init(config.google_admin_email, config.google_apps_domain, config.google_admin_pw)
+print "Fetching Google accounts..."
 googleaccounts = vlagoogleprovisionlib.AllAccounts(gservice)
 print "%s Google accounts (starting)" % len(googleaccounts.allaccounts)
 
@@ -171,7 +172,7 @@ for localaccount in datasource.users:
                 localaccount['password_hash_function'] = None
                 newaccountslog.write("%s: %s\n" % (localaccount['username'], password))
 
-            gservice.CreateUser(localaccount['username'], localaccount['lastname'], localaccount['firstname'], password, localaccount['password_hash_function'])
+            gservice.CreateUser(user_name=localaccount['username'], family_name=localaccount['lastname'], given_name=localaccount['firstname'], password=password, password_hash_function=localaccount['password_hash_function'])
             if ouhandler and 'ous' in localaccount:
                 try:
                     ouhandler.ensure_updateorguser(localaccount['username'], localaccount['ous'])

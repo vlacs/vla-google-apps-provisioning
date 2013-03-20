@@ -30,7 +30,7 @@ class DataSource:
                     if 'userAccountControl' in config.ldap_attrs and config.ldap_exclude_disabled:
                         # AD uses the second bit of userAccountControl to indicate a disabled account.
                         if 2 & int(ldapuser[config.ldap_attrs['userAccountControl']][0]):
-                            print "disabled: %s,%s" % (lastname, firstname)
+                            print "disabled: %s %s,%s" % (username, lastname, firstname)
                             continue
 
                     # drop the timezone portion of whenChanged (example: '20110526184938.0Z' -> '20110526184938'

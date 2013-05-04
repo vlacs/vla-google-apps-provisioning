@@ -15,6 +15,7 @@ class DataSource:
         return cur
 
     def getusers(self, config):
+        # TODO: rewrite this with respect to http://initd.org/psycopg/docs/usage.html#the-problem-with-the-query-parameters
         sql = "SELECT %s, %s, %s, %s, %s FROM %s" % (config.db_field_username, config.db_field_password, config.db_field_firstname, config.db_field_lastname, config.db_field_whenupdated, config.db_table)
         cur = self.db_execute(sql)
         for user in cur:

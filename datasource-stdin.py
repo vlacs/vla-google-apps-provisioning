@@ -17,50 +17,35 @@ class DataSource:
         password or password_hash
         password_hash_function {MD5 | SHA-1 | none}
         whenchanged (either 'now' or a UNIX timestamp is good here)
+        ous (if configured; see config.py for format)
 
         When finished, enter one blank line after the last whenchanged value.
         """
         while True:
-            username = sys.stdin.readline().rstrip(os.linesep)
-            if len(username) == 0:
-                if len(self.users):
-                    break
-                else:
-                    # We got no data.
-                    sys.exit()
-            firstname = sys.stdin.readline().rstrip(os.linesep)
-            if len(firstname) == 0:
-                sys.exit()
-            lastname = sys.stdin.readline().rstrip(os.linesep)
-            if len(lastname) == 0:
-                sys.exit()
-            password = sys.stdin.readline().rstrip(os.linesep)
-            if len(password) == 0:
-                sys.exit()
-            password_hash_function = sys.stdin.readline().rstrip(os.linesep)
-            if len(password_hash_function) == 0:
-                sys.exit()
-            whenchanged = sys.stdin.readline().rstrip(os.linesep)
-            if len(whenchanged) == 0:
-                sys.exit()
-
-            # drop the google domain from username, in case it's an email address
-            username = username.replace('@' + config.google_apps_domain, '')
-            assert username.count('@') == 0
+            user = {}
+            for field in ['username', 'firstname', 'lastname', 'password_hash', 'password_hash_function', 'whenchanged']:
+                user[field] = sys.stdin.readline().rstrip(os.linesep)
+                if len(user[field]) == 0:
+                    if field == 'username' and len(self.users):
+                        break
+                    else:
+                        sys.exit()
+            # lowercase the username and drop the google domain in case it's an email address
+            user['username'] = user['username'].lower().replace(('@' + config.google_apps_domain).lower(), '')
+            assert user['username'].count('@') == 0
 
             # 'now' is a special case of whenchanged
-            if whenchanged == 'now':
-                whenchanged = int(time.time())
+            if user['whenchanged'] == 'now':
+                user['whenchanged'] = int(time.time())
 
             # 'none' is a special case of password_hash_function
-            if password_hash_function.lower() == 'none':
-                password_hash_function = None
-                password_hash = None
-            else:
-                password_hash = password
+            if user['password_hash_function'].lower() == 'none':
+                user['password_hash_function'] = None
+                user['password_hash'] = None
 
-            self.users.append({'username': username, 'firstname': firstname, 'lastname': lastname, 'password': password, 'password_hash': password_hash, 'password_hash_function': password_hash_function, 'whenchanged': whenchanged, })
+            if config.stdin_ous:
+                user['ous'] = sys.stdin.readline().rstrip(os.linesep).split(';')
 
+            self.users.append(user)
         print self.users
         return
-

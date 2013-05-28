@@ -92,7 +92,7 @@ google_apps_domain = 'yourdomain.com'
 ## Currently this is ignored!
 ## db_type = 'postgres'
 
-## What is the name or IP address of your LDAP server?
+## What is the name or IP address of your DB server?
 #db_host = '192.168.0.1'
 #
 ## What is the name your database?
@@ -107,20 +107,34 @@ google_apps_domain = 'yourdomain.com'
 ## Which table should be queried for users?
 #db_table = 'user'
 #
-## Which field in the db_table has usernames to be matched with google?
-#db_field_username = 'username'
+#db_fields = {
+#    # required
+#    'username' : 'username',           # Which field in the db_table has usernames to be matched with google?
+#    'password' : 'password',           # Which field in the db_table has passwords to be sent to google?
+#    'firstname' : 'firstname',         # Which field in the db_table has first names to be sent to google?
+#    'lastname' : 'lastname',           # Which field in the db_table has last names to be sent to google?
+#    'whenchanged' : 'datemodified',    # Which field in the db_table indicates when the user was last updated?
 #
-## Which field in the db_table has passwords to be sent to google?
-#db_field_password = 'password'
+#    # optional ous field
+#    'ous' : 'ous',
 #
-## Which field in the db_table has first names to be sent to google?
-#db_field_firstname = 'firstname'
+#    # The ous should be a semicolon delimited list of ou names starting with the highest level ou. E.g.:
+#    #      'OU=Students,OU=Users,OU=Academic,OU=Some School,DC=YourDomain,DC=com'
+#    # would be:
+#    #      'Some School;Academic;Users;Students'
 #
-## Which field in the db_table has last names to be sent to google?
-#db_field_lastname = 'lastname'
-#
-## Which field in the db_table indicates when the user was last updated?
-#db_field_whenupdated = 'datemodified'
+#    }
 #######################################################################
 
+#######################################################################
+# DataSourceStdIn: config
+#
+## Set true to enable OUs
+stdin_ous = False;
+#
+## The ous should be a semicolon delimited list of ou names starting with the highest level ou. E.g.:
+##      'OU=Students,OU=Users,OU=Academic,OU=Some School,DC=YourDomain,DC=com'
+## would be:
+##      'Some School;Academic;Users;Students'
+#######################################################################
 

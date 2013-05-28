@@ -15,42 +15,39 @@ class DataSource:
         return cur
 
     def getusers(self, config):
-        # TODO: rewrite this with respect to http://initd.org/psycopg/docs/usage.html#the-problem-with-the-query-parameters
-        sql = "SELECT %s, %s, %s, %s, %s FROM %s" % (config.db_field_username, config.db_field_password, config.db_field_firstname, config.db_field_lastname, config.db_field_whenupdated, config.db_table)
+        sql = ', '.join(config.db_fields.values())
+        sql = "SELECT " + sql + " FROM " + config.db_table
         cur = self.db_execute(sql)
-        for user in cur:
+        for row in cur:
             self.count += 1
             try:
-                firstname = user[config.db_field_firstname]
-                lastname = user[config.db_field_lastname]
+                user = {}
+                for key in config.db_fields:
+                    if key == 'password': continue
+                    user[key] = row[config.db_fields[key]]
 
-                # lowercase the username
-                username = user[config.db_field_username].lower()
+                # lowercase the username and drop the google domain in case it's an email address
+                user['username'] = user['username'].lower().replace(('@' + config.google_apps_domain).lower(), '')
+                assert user['username'].count('@') == 0
 
-                # drop the google domain from username, in case it's an email address
-                username = username.replace('@' + config.google_apps_domain, '')
-                assert username.count('@') == 0
-
-                whenchanged = user[config.db_field_whenupdated]
-                #print "%s %s: %s, %s" % (firstname, lastname, username, whenchanged)
-
+                if 'ous' in config.db_fields:
+                    user['ous'] = user['ous'].split(';')
             except KeyError, inst:
                 print "exception: %s:%s" % (type(inst), inst)
-                print ldapuser
+                print row
                 continue
             except AssertionError, inst:
                 print "exception: %s:%s" % (type(inst), inst)
-                print ldapuser
+                print row
                 continue
 
-            password_hash = None
-            password_hash_function = None
+            user['password_hash'] = None
+            user['password_hash_function'] = None
             try:
-                password_hash = user[config.db_field_password]
-                password_hash_function = config.password_hash_function # Just to make sure this is set.
+                user['password_hash'] = user[config.db_fields['password']]
+                user['password_hash_function'] = config.password_hash_function # Just to make sure this is set.
             except KeyError:
                 pass
 
-            self.users.append({'username': username, 'firstname': firstname, 'lastname': lastname, 'password_hash': password_hash, 'password_hash_function': password_hash_function, 'whenchanged': whenchanged})
+            self.users.append(user)
         return
-

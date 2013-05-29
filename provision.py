@@ -199,7 +199,9 @@ for account in googleaccounts.get():
         sys.stdout.write("%s missing from local source" % username)
         missingaccountslogfile.write("%s\n" % username)
         missingcount += 1
-        if (account.login.suspended == 'true'):
+        if username in config.never_suspend:
+            sys.stdout.write(": skipping, in ignore list")
+        elif (account.login.suspended == 'true'):
             sys.stdout.write(": already suspended")
         elif (dosuspend):
             sys.stdout.write(": suspending...")

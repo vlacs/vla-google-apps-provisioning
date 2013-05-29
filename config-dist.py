@@ -21,6 +21,11 @@ password_hash_function = 'MD5'
 # If the configured datasource returns 'ous', shall we replicate these at Google?
 replicate_ous = True
 
+# List any users that should never be suspended:
+never_suspend = [
+#    'fbueller',
+]
+
 #######################################################################
 # GOOGLE config
 

@@ -74,7 +74,7 @@ google_apps_domain = 'yourdomain.com'
 #
 # ldap_attrs = {
 #     # required keys
-#     'username' : 'sAMAccountName',
+#     'username' : ['sAMAccountName', 'mail'],
 #     'firstname' : 'givenName',
 #     'lastname' : 'sn',
 #     'whenchanged' : 'whenChanged',

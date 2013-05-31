@@ -29,12 +29,7 @@ class DataSource:
             try:
                 firstname = ldapuser[config.ldap_attrs['firstname']][0]
                 lastname = ldapuser[config.ldap_attrs['lastname']][0]
-
-                # lowercase the username
-                username = ldapuser[config.ldap_attrs['username']][0].lower()
-                # drop the google domain from username, in case it's an email address
-                username = username.replace('@' + config.google_apps_domain, '')
-                assert username.count('@') == 0
+                username = ldap_get_username(config.ldap_attrs['username'], config.google_apps_domain, ldapuser)
 
                 if 'userAccountControl' in config.ldap_attrs and config.ldap_exclude_disabled:
                     # AD uses the second bit of userAccountControl to indicate a disabled account.
@@ -73,4 +68,18 @@ class DataSource:
 
             self.users.append({'username': username, 'firstname': firstname, 'lastname': lastname, 'ous': ous, 'password_hash': password_hash, 'password_hash_function': password_hash_function, 'whenchanged': whenchanged})
         return
+
+def ldap_get_username(username_attrs, google_apps_domain, ldapuser):
+    if username_attrs.__class__.__name__ == 'str':
+        # Ensure we have a list.
+        username_attrs = [username_attrs]
+    for attr in username_attrs:
+        if attr in ldapuser:
+            username = ldapuser[attr][0].lower()
+            # drop the google domain from username, in case it's an email address
+            username = username.replace('@' + google_apps_domain, '')
+            if len(username) and username.count('@') == 0:
+                return username
+    raise Exception('no username found')
+
 

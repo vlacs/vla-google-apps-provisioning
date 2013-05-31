@@ -4,7 +4,7 @@ newaccountslogfile = '/root/google-new-accounts.txt'
 missingaccountslogfile = '/root/google-missing-accounts.txt'
 
 # Persistent storage
-# Where do we keep persistent data needed by ldapconfig.py?
+# Where do we keep persistent data needed by provision.py?
 updatehistory_file = '/root/google-updatehistory.shelf'
 
 # Stock options: datasource-ldap, datasource-db, datasource-stdin

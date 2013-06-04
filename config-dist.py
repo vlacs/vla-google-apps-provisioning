@@ -21,6 +21,14 @@ password_hash_function = 'MD5'
 # If the configured datasource returns 'ous', shall we replicate these at Google?
 replicate_ous = True
 
+# If the datashource returns groups, shall we replicate them at Google?
+replicate_groups = False
+
+# List the groups that should be automatically managed:
+groups_whitelist = [
+#    'students',
+]
+
 # List any users that should never be suspended:
 never_suspend = [
 #    'fbueller',
@@ -120,7 +128,11 @@ google_apps_domain = 'yourdomain.com'
 #    'lastname' : 'lastname',           # Which field in the db_table has last names to be sent to google?
 #    'whenchanged' : 'datemodified',    # Which field in the db_table indicates when the user was last updated?
 #
-#    # optional ous field
+#    # optional fields
+#    'groups' : 'groups',
+#
+#    # The groups field should be a semicolon delimited list of groups names the user belongs to.
+#
 #    'ous' : 'ous',
 #
 #    # The ous should be a semicolon delimited list of ou names starting with the highest level ou. E.g.:
@@ -136,6 +148,9 @@ google_apps_domain = 'yourdomain.com'
 #
 ## Set true to enable OUs
 stdin_ous = False;
+#
+## Set true to enable groups
+stdin_groups = False;
 #
 ## The ous should be a semicolon delimited list of ou names starting with the highest level ou. E.g.:
 ##      'OU=Students,OU=Users,OU=Academic,OU=Some School,DC=YourDomain,DC=com'

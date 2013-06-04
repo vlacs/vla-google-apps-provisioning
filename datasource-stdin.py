@@ -18,6 +18,7 @@ class DataSource:
         password_hash_function {MD5 | SHA-1 | none}
         whenchanged (either 'now' or a UNIX timestamp is good here)
         ous (if configured; see config.py for format)
+        groups (if configured; see config.py for format)
 
         When finished, enter one blank line after the last whenchanged value.
         """
@@ -45,6 +46,8 @@ class DataSource:
 
             if config.stdin_ous:
                 user['ous'] = sys.stdin.readline().rstrip(os.linesep).split(';')
+            if config.stdin_groups:
+                user['groups'] = filter(None, sys.stdin.readline().rstrip(os.linesep).split(';'))
 
             self.users.append(user)
         print self.users

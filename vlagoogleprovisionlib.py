@@ -48,6 +48,7 @@ import re
 import urllib
 import gdata.apps.service
 import gdata.apps.organization.client
+import gdata.apps.groups.client
 
 myname = 'vlagoogleprovision.py'
 
@@ -69,6 +70,52 @@ class AllAccounts:
         for un in self.allaccounts.keys():
             yield self.allaccounts[un]
 
+class GroupHandler:
+    groupclient = None
+    existing_groups = []
+    whitelist = []
+    domain = None
+    def __init__(self, email, domain, password, whitelist):
+        self.domain = domain
+        self.whitelist = whitelist
+
+        self.groupclient = gdata.apps.groups.client.GroupsProvisioningClient(domain)
+        self.groupclient.ClientLogin(email, password, source='apps')
+
+    def groupIdsFromFeed(self, feed):
+        groups = [dict([p.name, p.value] for p in group.property) for group in feed.entry]
+        return [group['groupId'].replace('@' + self.domain, '') for group in groups]
+
+    def retrieveAll(self):
+        self.existing_groups = self.groupIdsFromFeed(self.groupclient.RetrieveAllGroups())
+
+    def ensure_group(self, group):
+        if not self.existing_groups:
+            self.retrieveAll()
+        if group not in self.existing_groups:
+            print "creating Group: %s" % group
+            self.groupclient.CreateGroup(group, group, 'provisioned ' + group + ' group', 'Owner')
+            self.existing_groups.append(group)
+
+    def retrieveUserGroups(self, username):
+        return self.groupIdsFromFeed(self.groupclient.RetrieveGroups(username, direct_only=True))
+
+    def updateusergroups(self, username, groups):
+        user_email = username + '@' + self.domain
+        print "UpdateUserGroups: user_email: %s, groups: %s" % (user_email, ', '.join(groups))
+        current_groups = self.retrieveUserGroups(username)
+
+        for group in groups:
+            if group not in current_groups and group in self.whitelist:
+                self.groupclient.AddMemberToGroup(group + '@' + self.domain, username)
+        for group in current_groups:
+            if group not in groups and group in self.whitelist:
+                self.groupclient.RemoveMemberFromGroup(group + '@' + self.domain, username)
+
+    def ensure_updateusergroups(self, username, groups):
+        for group in groups:
+            if group in self.whitelist: self.ensure_group(group)
+        return self.updateusergroups(username, groups)
 
 class OUHandler:
     ouclient = None

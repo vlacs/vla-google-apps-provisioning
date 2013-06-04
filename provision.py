@@ -113,6 +113,10 @@ ouhandler = False
 if config.replicate_ous:
     ouhandler = vlagoogleprovisionlib.OUHandler(config.google_admin_email, config.google_apps_domain, config.google_admin_pw)
 
+grouphandler = False
+if config.replicate_groups:
+    grouphandler = vlagoogleprovisionlib.GroupHandler(config.google_admin_email, config.google_apps_domain, config.google_admin_pw, config.groups_whitelist)
+
 # ##################################################################
 # Create and update google accouns from local data.
 googlenewcount = 0
@@ -151,6 +155,12 @@ for localaccount in datasource.users:
                         except Exception, inst:
                             sys.stdout.write("%s(%s): ensure_updateorguser exception: %s:%s" % (localaccount['username'], localaccount['ous'], type(inst), inst))
                             continue
+                    if grouphandler and 'groups' in localaccount:
+                        try:
+                            grouphandler.ensure_updateusergroups(localaccount['username'], localaccount['groups'])
+                        except Exception, inst:
+                            sys.stdout.write("%s(%s): ensure_updateusergroups exception: %s:%s" % (localaccount['username'], localaccount['groups'], type(inst), inst))
+                            continue
                     update_history[localaccount['username']] = localaccount['whenchanged']
                     sys.stdout.write("updated.\n")
                     googleupdcount += 1
@@ -178,6 +188,12 @@ for localaccount in datasource.users:
                     ouhandler.ensure_updateorguser(localaccount['username'], localaccount['ous'])
                 except Exception, inst:
                     sys.stdout.write("%s(%s): ensure_updateorguser exception: %s:%s" % (localaccount['username'], localaccount['ous'], type(inst), inst))
+                    continue
+            if grouphandler and 'groups' in localaccount:
+                try:
+                    grouphandler.ensure_updateusergroups(localaccount['username'], localaccount['groups'])
+                except Exception, inst:
+                    sys.stdout.write("%s(%s): ensure_updateusergroups exception: %s:%s" % (localaccount['username'], localaccount['groups'], type(inst), inst))
                     continue
             update_history[localaccount['username']] = localaccount['whenchanged']
             sys.stdout.write("done\n")

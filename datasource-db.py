@@ -32,6 +32,8 @@ class DataSource:
 
                 if 'ous' in config.db_fields:
                     user['ous'] = user['ous'].split(';')
+                if 'groups' in config.db_fields:
+                    user['groups'] = filter(None, user['groups'].split(';'))
             except KeyError, inst:
                 print "exception: %s:%s" % (type(inst), inst)
                 print row

@@ -21,7 +21,7 @@ password_hash_function = 'MD5'
 # If the configured datasource returns 'ous', shall we replicate these at Google?
 replicate_ous = True
 
-# If the datashource returns groups, shall we replicate them at Google?
+# If the datasource returns groups, shall we replicate them at Google?
 replicate_groups = False
 
 # List the groups that should be automatically managed:

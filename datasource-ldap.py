@@ -55,6 +55,10 @@ class DataSource:
                 print "exception: %s:%s" % (type(inst), inst)
                 print ldapuser
                 continue
+            except Exception, inst:
+                print "exception: %s:%s" % (type(inst), inst)
+                print ldapuser
+                continue
 
             password_hash = None
             password_hash_function = None

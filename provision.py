@@ -130,11 +130,11 @@ for localaccount in datasource.users:
     googleaccount = googleaccounts.exists(localaccount['username'])
     if googleaccount:
         sys.stdout.write("exists")
-        if (googleaccount.login.suspended == 'true'):
-            gservice.RestoreUser(localaccount['username'])
-            sys.stdout.write(", un-suspending")
-
         try:
+            if (googleaccount.login.suspended == 'true'):
+                gservice.RestoreUser(localaccount['username'])
+                sys.stdout.write(", un-suspending")
+
             if localaccount['username'] not in update_history:
                 update_history[localaccount['username']] = 0
             if update_history[localaccount['username']] >= localaccount['whenchanged']:

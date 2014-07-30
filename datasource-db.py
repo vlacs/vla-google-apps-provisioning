@@ -23,7 +23,6 @@ class DataSource:
             try:
                 user = {}
                 for key in config.db_fields:
-                    if key == 'password': continue
                     user[key] = row[config.db_fields[key]]
 
                 # lowercase the username and drop the google domain in case it's an email address
@@ -46,7 +45,7 @@ class DataSource:
             user['password_hash'] = None
             user['password_hash_function'] = None
             try:
-                user['password_hash'] = user[config.db_fields['password']]
+                user['password_hash'] = user['password']
                 user['password_hash_function'] = config.password_hash_function # Just to make sure this is set.
             except KeyError:
                 pass
